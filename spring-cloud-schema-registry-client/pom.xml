@@ -11,7 +11,7 @@
 
 	<artifactId>spring-cloud-schema-registry-client</artifactId>
 	<properties>
-		<avro.version>1.8.1</avro.version>
+		<avro.version>1.9.1</avro.version>
 	</properties>
 
 	<dependencies>

@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.avro.AvroFactory;
 import com.fasterxml.jackson.dataformat.avro.AvroMapper;
 import com.fasterxml.jackson.dataformat.avro.AvroSchema;
-import com.fasterxml.jackson.dataformat.avro.schema.AvroSchemaGenerator;
+import com.fasterxml.jackson.dataformat.avro.schema.PatchAvroSchemaGenerator;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaParseException;
 import org.apache.avro.file.DataFileReader;
@@ -87,7 +87,7 @@ public class AvroSchemaServiceManagerTests {
 			@Override
 			public Schema getSchema(Class<?> clazz) {
 				ObjectMapper mapper = new ObjectMapper(new AvroFactory());
-				AvroSchemaGenerator gen = new AvroSchemaGenerator();
+				PatchAvroSchemaGenerator gen = new PatchAvroSchemaGenerator();
 				try {
 					mapper.acceptJsonFormatVisitor(FoodOrder.class, gen);
 				}
@@ -110,9 +110,9 @@ public class AvroSchemaServiceManagerTests {
 
 			@Override
 			public Object readData(Class<? extends Object> targetClass, byte[] payload, Schema readerSchema,
-											Schema writerSchema) throws IOException {
+					Schema writerSchema) throws IOException {
 				ObjectMapper mapper = new ObjectMapper(new AvroFactory());
-				AvroSchemaGenerator gen = new AvroSchemaGenerator();
+				PatchAvroSchemaGenerator gen = new PatchAvroSchemaGenerator();
 				try {
 					mapper.acceptJsonFormatVisitor(targetClass, gen);
 				}
@@ -120,8 +120,8 @@ public class AvroSchemaServiceManagerTests {
 					fail("Error while setting acceptJsonFormatVisitor {}", e);
 				}
 				return mapper.readerFor(targetClass)
-					.with(new AvroSchema(readerSchema))
-					.readValue(payload);
+						.with(new AvroSchema(readerSchema))
+						.readValue(payload);
 			}
 		};
 
@@ -148,19 +148,19 @@ public class AvroSchemaServiceManagerTests {
 		MimeType mimeType = new MimeType("application", "avro");
 		assertThat(mimeType).isEqualTo(converter.getSupportedMimeTypes().get(0));
 
-		AvroSchemaMessageConverter  converter2 = new AvroSchemaMessageConverter(mimeType);
+		AvroSchemaMessageConverter converter2 = new AvroSchemaMessageConverter(mimeType);
 		assertThat(mimeType).isEqualTo(converter2.getSupportedMimeTypes().get(0));
 
-		AvroSchemaMessageConverter  converter3 =
-			new AvroSchemaMessageConverter(Lists.newArrayList(mimeType));
+		AvroSchemaMessageConverter converter3 =
+				new AvroSchemaMessageConverter(Lists.newArrayList(mimeType));
 		assertThat(mimeType).isEqualTo(converter3.getSupportedMimeTypes().get(0));
 
 		AvroSchemaServiceManager manager = new AvroSchemaServiceManagerImpl();
-		AvroSchemaMessageConverter  converter4 = new AvroSchemaMessageConverter(manager);
+		AvroSchemaMessageConverter converter4 = new AvroSchemaMessageConverter(manager);
 		assertThat(mimeType).isEqualTo(converter4.getSupportedMimeTypes().get(0));
 
-		AvroSchemaMessageConverter  converter5 =
-			new AvroSchemaMessageConverter(Lists.newArrayList(mimeType), manager);
+		AvroSchemaMessageConverter converter5 =
+				new AvroSchemaMessageConverter(Lists.newArrayList(mimeType), manager);
 		Schema schema = manager.getSchema(FoodOrder.class);
 		converter5.setSchema(schema);
 		assertThat(mimeType).isEqualTo(converter5.getSupportedMimeTypes().get(0));
@@ -171,8 +171,8 @@ public class AvroSchemaServiceManagerTests {
 	public void testAvroSchemaMessageConverterException() {
 		MimeType mimeType = new MimeType("application", "avro");
 		AvroSchemaServiceManager manager = new AvroSchemaServiceManagerImpl();
-		AvroSchemaMessageConverter  converter =
-			new AvroSchemaMessageConverter(Lists.newArrayList(mimeType), manager);
+		AvroSchemaMessageConverter converter =
+				new AvroSchemaMessageConverter(Lists.newArrayList(mimeType), manager);
 		converter.setSchemaLocation(new ByteArrayResource(new byte[2]) {
 		});
 	}
